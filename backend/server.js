@@ -1,6 +1,21 @@
 // THE ULTIMATE HACK: Library ko tfjs-node chahiye, hum tfjs pakda rahe hain!
 require('dotenv').config();
 require('module-alias/register'); 
+// Debugging code
+console.log("--- DEBUG START ---");
+console.log("Current Working Directory (CWD):", process.cwd());
+const fs = require('fs');
+const path = require('path');
+const nodeModulesPath = path.join(process.cwd(), 'backend', 'node_modules', 'node-cron');
+console.log("Checking if node-cron exists at:", nodeModulesPath);
+console.log("Does path exist?", fs.existsSync(nodeModulesPath));
+console.log("--- DEBUG END ---");
+
+// Ab tumhare baaki imports
+require('dotenv').config();
+require('module-alias/register');
+const cron = require('node-cron');
+// ... baaki ka code ...
 const cron = require('node-cron'); 
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);// Ye line sabse upar honi chahiye
@@ -91,7 +106,7 @@ mongoose.connect(MONGO_URI, {
     console.error('❌ MongoDB connection error:', err.message);
     console.log('⚠️ Running backend server with local JSON fallback database.');
 });
-const cron = require('./node_modules/node-cron')
+const cron = require('node-cron')
 const cloudinary = require('cloudinary').v2;
 const PhotoTracker = require('./models/PhotoTracker');
 const Guest = require('./models/Guest');
