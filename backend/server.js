@@ -14,8 +14,6 @@ console.log("--- DEBUG END ---");
 // Ab tumhare baaki imports
 require('dotenv').config();
 require('module-alias/register');
-const cron = require('node-cron');
-// ... baaki ka code ...
 const cron = require('node-cron'); 
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);// Ye line sabse upar honi chahiye
