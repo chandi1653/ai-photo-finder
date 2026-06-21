@@ -4,20 +4,17 @@ import CameraBox from './ui/CameraBox';
 import Loader from './ui/Loader';
 import PhotoCard from './ui/PhotoCard'; 
 import QrModal from './ui/QrModal'; 
-import imageCompression from 'browser-image-compression'; // 👈 Compression import kiya
+import imageCompression from 'browser-image-compression';
 
 const getPhotoUrl = (photo) => {
   if (!photo) return "";
   
   if (typeof photo === "string") {
-    // Agar photo 'http' se shuru hoti hai, toh wo Cloudinary ki live link hai
     if (photo.startsWith("http")) {
       return photo;
     }
-    
-    // Agar 'http' nahi hai, matlab wo purani local photo hai. 
-    // Usme hum local server ka address jod denge.
-    return `http://${window.location.hostname}:5001/uploads/${photo}`;
+
+    return `https://ai-photo-finder-13.onrender.com/uploads/${photo}`;
   }
   
   return "";
@@ -43,14 +40,12 @@ const SmartGallery = () => {
     }
   }, []);
 
-  // 👇 YAHAN OPTIMIZATION ADD KI GAYI HAI (Image Compression)
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
       try {
-        setStatus("uploading"); // Jab tak compress ho raha hai loader dikhao
+        setStatus("uploading"); 
         
-        // Settings: Max 100KB ki image, taki AI turant scan kar le
         const options = {
           maxSizeMB: 0.1,
           maxWidthOrHeight: 1000,
@@ -89,7 +84,7 @@ const SmartGallery = () => {
       const formData = new FormData();
       formData.append("selfie", blob, "selfie.jpg");
 
-      const response = await fetch(`http://${window.location.hostname}:5001/api/guests/find-photos`, {
+      const response = await fetch(`https://ai-photo-finder-13.onrender.com/api/guests/find-photos`, {
         method: 'POST',
         body: formData
       });
@@ -97,7 +92,6 @@ const SmartGallery = () => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Failed to find photos");
 
-      // Filter: Sirf Cloudinary (http) wali photos dikhao
       const validCloudPhotos = (result.photos || []).filter(photo => {
         return typeof photo === "string" && photo.startsWith("http");
       });
@@ -115,7 +109,6 @@ const SmartGallery = () => {
 
   return (
     <>
-      {/* 📸 MAIN CAMERA & RESULTS CARD */}
       <div className="max-w-xl mx-auto p-4 md:p-8 bg-slate-900/40 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-700 mt-4 mb-10 transition-all">
         
         <Header />
@@ -163,12 +156,10 @@ const SmartGallery = () => {
           </div>
         )}
 
-        {/* QR MODAL POPUP COMPONENT */}
         <QrModal isOpen={isQrOpen} onClose={() => setIsQrOpen(false)} />
         
       </div>
 
-      {/* FLOATING QR BUTTON */}
       <button 
         onClick={() => setIsQrOpen(true)}
         title="Show QR Code"

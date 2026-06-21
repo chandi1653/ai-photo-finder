@@ -7,7 +7,6 @@ const EventPhotoUpload = ({ eventId }) => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   
-  // Progress Bar State
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedCount, setUploadedCount] = useState(0);
   
@@ -32,12 +31,11 @@ const EventPhotoUpload = ({ eventId }) => {
     setMessage('Compressing photos for ultra-fast upload... ⚡');
 
     try {
-      // 1. Compress Images First (Set to 3MB for Better AI Face Detection)
       const compressedFiles = await Promise.all(
         Array.from(selectedFiles).map(async (file) => {
           try {
             const options = {
-              maxSizeMB: 3, // AI ke liye high quality maintain karega
+              maxSizeMB: 3, 
               maxWidthOrHeight: 2500, 
               useWebWorker: true,
             };
@@ -58,8 +56,7 @@ const EventPhotoUpload = ({ eventId }) => {
       
       formData.append('eventId', eventId || 'dummy-event-id'); 
 
-      // 2. Upload with Axios & Track Real-Time Progress
-      const response = await axios.post(`http://${window.location.hostname}:5001/api/events/upload`, formData, {
+      const response = await axios.post(`https://ai-photo-finder-13.onrender.com/api/events/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -72,7 +69,6 @@ const EventPhotoUpload = ({ eventId }) => {
 
       setMessage(`✅ ${response.data.message}`);
       
-      // 3. UI Reset after 2 seconds
       setTimeout(() => {
         setSelectedFiles([]); 
         if (fileInputRef.current) {
@@ -94,7 +90,6 @@ const EventPhotoUpload = ({ eventId }) => {
   return (
     <div className="w-full flex flex-col items-center pt-8">
       
-      {/* 🔥 PREMIUM STYLISH HEADER */}
       <div className="text-center mb-10">
         <div className="inline-block mb-3 px-4 py-1 rounded-full bg-blue-900/40 border border-blue-500/30 text-blue-400 text-[10px] font-black tracking-[0.2em] uppercase shadow-[0_0_15px_rgba(59,130,246,0.3)] backdrop-blur-sm">
           Admin Upload Panel
@@ -107,7 +102,6 @@ const EventPhotoUpload = ({ eventId }) => {
         </p>
       </div>
 
-      {/* Premium Dashed File Upload Area */}
       <div className={`relative w-full border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 group shadow-inner ${selectedFiles?.length > 0 ? 'border-cyan-500 bg-cyan-900/10' : 'border-slate-600 hover:border-cyan-500 bg-slate-900/40'}`}>
         
         <input 
@@ -142,7 +136,6 @@ const EventPhotoUpload = ({ eventId }) => {
         </div>
       </div>
 
-      {/* 🔥 PREMIUM PROGRESS BAR UI OR UPLOAD BUTTON */}
       {uploading ? (
         <div className="w-full mt-6 bg-slate-800/60 p-5 rounded-2xl border border-slate-700 shadow-lg backdrop-blur-sm">
           <div className="flex justify-between text-slate-300 text-sm font-bold mb-3 tracking-wide">
@@ -154,9 +147,7 @@ const EventPhotoUpload = ({ eventId }) => {
             <span className="text-cyan-400">{uploadProgress}%</span>
           </div>
           
-          {/* Progress Bar Track */}
           <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden shadow-inner border border-slate-800">
-            {/* Progress Bar Fill with Glow */}
             <div 
               className="bg-gradient-to-r from-cyan-400 to-blue-600 h-full rounded-full transition-all duration-300 ease-out relative"
               style={{ width: `${uploadProgress}%` }}
@@ -175,7 +166,6 @@ const EventPhotoUpload = ({ eventId }) => {
         </button>
       )}
 
-      {/* Dynamic Status Message with Glass Effect */}
       {message && (
         <div className={`w-full mt-5 p-4 rounded-xl text-center font-bold backdrop-blur-md border ${
           message.includes('✅') 
