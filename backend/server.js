@@ -1,31 +1,21 @@
 // THE ULTIMATE HACK: Library ko tfjs-node chahiye, hum tfjs pakda rahe hain!
 require('dotenv').config();
 require('module-alias/register'); 
-// Debugging code
-console.log("--- DEBUG START ---");
-console.log("Current Working Directory (CWD):", process.cwd());
-const fs = require('fs');
-const path = require('path');
-const nodeModulesPath = path.join(process.cwd(), 'backend', 'node_modules', 'node-cron');
-console.log("Checking if node-cron exists at:", nodeModulesPath);
-console.log("Does path exist?", fs.existsSync(nodeModulesPath));
-console.log("--- DEBUG END ---");
 
-// Ab tumhare baaki imports
-require('dotenv').config();
-require('module-alias/register');
-const cron = require('node-cron'); 
+// 1. Dns and Module Alias setup (Sabse Pehle)
 const dns = require('dns');
-dns.setServers(['8.8.8.8', '8.8.4.4']);// Ye line sabse upar honi chahiye
+dns.setServers(['8.8.8.8', '8.8.4.4']); // Ye line sabse upar honi chahiye
 const moduleAlias = require('module-alias');
 moduleAlias.addAlias('@tensorflow/tfjs-node', '@tensorflow/tfjs');
 
+// 2. Import core libraries ONLY ONCE (Yehi duplicate errors la rahe the)
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path'); 
+const path = require('path'); // Ye sirf ek baar import hua hai
 const fs = require('fs');
-require('dotenv').config();
+const cron = require('node-cron'); // Ye sirf ek baar import hua hai
+const cloudinary = require('cloudinary').v2;
 
 // Canvas and AI face-api Global Setup
 const { Canvas, Image, ImageData } = require('canvas');
@@ -37,6 +27,7 @@ global.TextEncoder = global.TextEncoder || TextEncoder;
 global.TextDecoder = global.TextDecoder || TextDecoder;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
+// Models paths (AI Photo specific variables)
 const modelsPath = path.join(__dirname, 'node_modules/@vladmandic/face-api/model');
 console.log('🧠 Loading AI Models globally...');
 Promise.all([
@@ -47,6 +38,7 @@ Promise.all([
 .then(() => console.log('🧠 AI Models loaded successfully!'))
 .catch(err => console.error("❌ Model loading error:", err));
 
+// 3. Express App Setup
 const app = express();
 
 app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
@@ -56,6 +48,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Uploads folder ko frontend ke liye open kar diya hai
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Routes
 const guestRoutes = require('./routes/guestRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 app.use('/api/guests', guestRoutes);
@@ -66,7 +59,7 @@ app.get('/', (req, res) => res.send('AI Photo App Backend is running!'));
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/ai-photo-app';
 
-// Database connection (Non-blocking with a 5-second timeout)
+// 4. Database Connection (Non-blocking with a 5-second timeout)
 console.log('🔄 Connecting to MongoDB...');
 mongoose.connect(MONGO_URI, {
     tlsAllowInvalidCertificates: true,
@@ -104,8 +97,8 @@ mongoose.connect(MONGO_URI, {
     console.error('❌ MongoDB connection error:', err.message);
     console.log('⚠️ Running backend server with local JSON fallback database.');
 });
-const cron = require('node-cron')
-const cloudinary = require('cloudinary').v2;
+
+// Import models for the CRON job
 const PhotoTracker = require('./models/PhotoTracker');
 const Guest = require('./models/Guest');
 
@@ -148,4 +141,6 @@ cron.schedule('0 * * * *', async () => {
         console.error("❌ Destructor Error:", err);
     }
 });
+
+// 5. Start Server
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on http://0.0.0.0:${PORT}`));
